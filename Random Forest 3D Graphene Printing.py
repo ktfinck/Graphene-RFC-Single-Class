@@ -57,14 +57,16 @@ rfcPredict  = RFC.predict(X)
 print('Random Forest Score: ', rfcScore)
 #print(rfcPredict)
 
+#%% Confusion Matrix
+
 confusion_matrix(y, rfcPredict)
 print(confusion_matrix(y, rfcPredict))
 recall = recall_score(y, rfcPredict)
 prec = precision_score(y, rfcPredict)
 f1 = 2 * (prec*recall)/(prec+recall)
-
-plot_confusion_matrix(RFC, X, y, cmap= 'plasma')
-plt.title('Confusion Matrix for Random Forest Classifier')
+fig, ax = plt.subplots(dpi=200)
+plot_confusion_matrix(RFC, X, y, cmap= 'bone', ax=ax)
+plt.title('Confusion Matrix: Random Forest Classifier')
 plt.xlabel('Predicted')
 plt.ylabel('Actual')
 print('Recall Score:', recall)
@@ -103,14 +105,14 @@ for f in range(X.shape[1]):
     print("%d.  %s (%f)" % (f + 1, label[f], importance[indices[f]]))
 
 # Plot the impurity-based feature importances of the forest
-plt.figure()
-plt.title("Feature importances")
+plt.figure('feature importance', dpi=200)
+plt.title("Feature Importance: Random Forest Classifier")
 plt.bar(range(X.shape[1]), importance[indices],
-        color="r", yerr=std[indices], align="center")
+        color=["dodgerblue", "goldenrod", "firebrick"], yerr=std[indices], align="center", width=0.7)
 plt.xticks(range(X.shape[1]), label)
-plt.xlim([-1, X.shape[1]])
+plt.xlim([-.5, X.shape[1]-.5])
 plt.ylim([0,1])
-plt.show()
+
 
 #%% K-Fold Validation
 
