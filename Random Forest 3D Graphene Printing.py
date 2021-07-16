@@ -11,13 +11,15 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
-from sklearn.preprocessing import StandardScaler
 from sklearn.datasets import make_classification
 from sklearn.linear_model import LinearRegression
-
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import recall_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import plot_confusion_matrix
 #%% Data Import and Trimming
 
-file = r'D:\ktfin\Documents\Python\ME 528\ProcessParameterDataset.xlsx'
+file = r'ProcessParameterDataset.xlsx'
 data = pd.read_excel(file)
 data = data.replace(to_replace='non conductive line ', value=0)
 trainData = pd.read_excel(file, usecols="A:C")
@@ -27,8 +29,6 @@ FlowrateData   = np.array(data['Flowrate (ul/min)'], dtype=np.float64)
 VoltageData    = np.array(data['Applied voltage (kV)'], dtype=np.float64)
 ResistanceData = np.array(data['Resistance (kOhms)'], dtype=np.float64)
 CombinedData   = np.array(trainData)
-
-
 
 TrimmedData = np.delete(ResistanceData, np.where(ResistanceData == 0))
 SortedData = np.sort(TrimmedData)
@@ -46,18 +46,30 @@ for i in range(0, np.size(HiLowData)):
 X = CombinedData
 y = HiLowData
 
-
-
 X, y = make_classification(n_samples=105, n_features= 3, n_informative=3, n_redundant=0, random_state=0, shuffle=False)
 
 RFC         = RandomForestClassifier(n_estimators=100, max_depth=3, max_features=None, n_jobs=-1)
 RFC.fit(X, y)
 
 rfcScore    = RFC.score(X,y)
-rfcPredict  = RFC.predict([[500, 9, 0]])
+rfcPredict  = RFC.predict(X)
 
 print('Random Forest Score: ', rfcScore)
 #print(rfcPredict)
+
+confusion_matrix(y, rfcPredict)
+print(confusion_matrix(y, rfcPredict))
+recall = recall_score(y, rfcPredict)
+prec = precision_score(y, rfcPredict)
+f1 = 2 * (prec*recall)/(prec+recall)
+
+plot_confusion_matrix(RFC, X, y, cmap= 'plasma')
+plt.title('Confusion Matrix for Random Forest Classifier')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+print('Recall Score:', recall)
+print('Precision Score', prec)
+print('F1 Score', f1)
 
 #%% Linear Regression
 
@@ -111,10 +123,13 @@ for train_index, test_index in k_fold.split(X,y):
       X_train, X_test = X[train_index], X[test_index]
       y_train, y_test = y[train_index], y[test_index]
       #print(X_train, X_test, y_train, y_test)
-k_fold_score_RFC = cross_val_score(RFC, X, y, cv=None)
+k_fold_score_RFC = cross_val_score(RFC, X, y, cv=k_fold, n_jobs=-1)
 k_fold_score_LR = cross_val_score(LR, X, y, cv=None)
-print('5-Fold Validation Score (RFC): ', k_fold_score_RFC)
+print('\n5-Fold Validation Score (RFC): ', k_fold_score_RFC)
 print('5-Fold Validation Score (LR): ', k_fold_score_LR)
+
+
+
 
 
 # Median of the resistance data. above 0 below median is good. everything else is bad
