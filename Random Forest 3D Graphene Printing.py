@@ -60,7 +60,8 @@ print('Random Forest Score: ', rfcScore)
 #%% Confusion Matrix
 
 confusion_matrix(y, rfcPredict)
-print(confusion_matrix(y, rfcPredict))
+#print(confusion_matrix(y, rfcPredict))
+
 recall = recall_score(y, rfcPredict)
 prec = precision_score(y, rfcPredict)
 f1 = 2 * (prec*recall)/(prec+recall)
@@ -95,9 +96,9 @@ for f in range(X.shape[1]):
     if indices[f] == 0:
         label.append('Nozzle Speed')
     elif indices[f] == 1:
-        label.append('Flow Rate')
+        label.append('Flowrate')
     elif indices[f] == 2:
-        label.append('Applied Voltage')
+        label.append('Voltage')
 
 print("Feature ranking:")
 
@@ -105,15 +106,15 @@ for f in range(X.shape[1]):
     print("%d.  %s (%f)" % (f + 1, label[f], importance[indices[f]]))
 
 # Plot the impurity-based feature importances of the forest
-plt.figure('feature importance', dpi=200)
+fig, ax = plt.subplots(dpi=200)
 plt.title("Feature Importance: Random Forest Classifier")
 plt.bar(range(X.shape[1]), importance[indices],
-        color=["dodgerblue", "goldenrod", "firebrick"], yerr=std[indices], align="center", width=0.7)
+        color=["dodgerblue", "goldenrod", "firebrick"], yerr=std[indices], align="center", width=0.7, capsize=5)
 plt.xticks(range(X.shape[1]), label)
 plt.xlim([-.5, X.shape[1]-.5])
 plt.ylim([0,1])
-
-
+ax.yaxis.grid()
+plt.ylabel('Importance')
 #%% K-Fold Validation
 
 k_fold = KFold(n_splits=5)
